@@ -1,11 +1,15 @@
 {
   "resources": {
     "models": {
+      "backpack": {
+        "path": "backpack/backpack.obj",
+        "flip_uvs": true
+      }
     }
   },
   "window": {
-    "height": 600,
-    "title": "Hello, window!",
-    "width": 800
+    "height": 800,
+    "title": "Night on a beach",
+    "width": 1200
   }
 }
