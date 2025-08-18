@@ -19,7 +19,8 @@
 
 {1} --- 0 ---Triggers---> {Pojacava jacinu difuznog zraka}
 {2} --- 0 ---Triggers---> {Smanjuje jacinu difuznog zraka}
-{3} --- par sekundi ---Triggers---> {Bez blokiranja game loop-a model psa ce nestati sa scene, takodje pritiskom na isto
+{F3} --- par sekundi ---Triggers---> {Bez blokiranja game loop-a model psa ce nestati sa scene, takodje pritiskom na
+isto
 dugme ce se pas vratiti na scenu(ako nije na njoj)}
 
 ### Fundamental:
