@@ -15,6 +15,10 @@
       "dog": {
         "path": "Dog1/Dog1.obj",
         "flip_uvs": true
+      },
+      "rock": {
+        "path": "rock/rock.obj",
+        "flip_uvs": true
       }
     }
   },
