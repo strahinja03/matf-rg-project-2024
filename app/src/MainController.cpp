@@ -27,6 +27,7 @@ namespace my_project {
 
         // Setup the initial camera parametars
         initialize_camera();
+        setup_random_rock_models_matrices();
     }
 
     bool MyController::loop() {
@@ -240,9 +241,6 @@ namespace my_project {
 
     // Funkcija treba da mi konstruise "nasumicne" modele modele transformacija, treba mi onoliko matrica koliko cu imati instanci
     void MyController::setup_random_rock_models_matrices() {
-        // Posto ce se init_rock_m_models pozivati u svakoj interaciji gejm petlje treba da izbegnem da vrsim skupo procesorsko izracunavanje svaki put
-        if (m_models_setup != 0) return;
-
         auto resources = engine::core::Controller::get<engine::resources::ResourcesController>();
         // Ucitavam model koji ce biti renderovan vise puta(instanciran)
         engine::resources::Model *rock_model = resources->model("rock");
@@ -273,13 +271,9 @@ namespace my_project {
         }
 
         rock_model->set_instance_transforms(m_model_matrices);
-        m_models_setup = true;
-        // Kada izvrsim inicijalizaciju ne treba u narednim koracima da je vrsim
     }
 
     void MyController::draw_instance() {
-        setup_random_rock_models_matrices();
-
         auto resources = engine::core::Controller::get<engine::resources::ResourcesController>();
         engine::resources::Model *rock_model = resources->model("rock");
         engine::resources::Shader *shader = resources->shader("rock_instance_shader");

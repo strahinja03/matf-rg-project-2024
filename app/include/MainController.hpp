@@ -70,7 +70,6 @@ namespace my_project {
         };
 
         std::vector<glm::mat4> m_model_matrices{0};
-        bool m_models_setup = false;
         uint32_t m_instance_count = 1000;
 
         bool m_event1_in_waiting{false};
