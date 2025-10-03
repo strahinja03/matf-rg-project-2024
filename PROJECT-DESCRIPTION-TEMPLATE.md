@@ -1,19 +1,17 @@
-# {NAME-OF-THE-PROJECT}
+# Floating safe haven
 
-{INDEX} - {STUDENT-FULL-NAME}  
+mi22243 - Strahinja Stepanovic
 {PROJECT DESCRIPTION}
 
 ## Controls
 
-{W} -> {Napred}  
-{A} -> {Levo}
-{S} -> {Nazad}
-{D} -> {Desno}
-{CTRL} -> {Dole}
-{SPACE} -> {Gore}
+W -> Napred
+A -> Levo
+S -> Dole
+D -> Desno
 
-{F1} -> {Iskljucuje kursor}
-{F2} -> {Kamera info GUI}
+F1 -> Iskljucuje kursor
+F2 -> Kamera info GUI
 
 ## Features
 
@@ -27,12 +25,11 @@ dugme ce se pas vratiti na scenu(ako nije na njoj)}
 
 [X] Model with lighting
 [X] Two types of lighting with customizable colors and movement through GUI or ACTIONS
-[X]
 
 ### Group A:
 
 [ ] Frame-buffers with post-processing   
-[ ] Instancing  
+[X] Instancing  
 [ ] Off-screen Anti-Aliasing  
 [ ] Parallax Mapping
 
@@ -49,12 +46,12 @@ dugme ce se pas vratiti na scenu(ako nije na njoj)}
 
 ## Models:
 
-[link1]   
-[link2]
+[link1]/
+[link2]/
 
 ## Textures
 
-[link1]  
-[link2]
+[link1]/
+[link2]/
 
 {OTHER-RESOURCES}
