@@ -14,7 +14,7 @@
 #include <random>
 
 namespace my_project {
-    MyController::Timer MyController::inner_event_timer(0.0f);
+    engine::util::Timer MyController::inner_event_timer(0.0f);
 
     void MyController::initialize() {
         engine::graphics::OpenGL::enable_depth_testing();
@@ -41,7 +41,7 @@ namespace my_project {
             platform->set_enable_cursor(m_enable_cursor);
         }
 
-        // Control directional lighting diffuse strength +, -
+        // Control directional lighting diffuse strength - (1), + (2)
         if (platform->key(engine::platform::KEY_1).state() == engine::platform::Key::State::JustPressed) {
             m_directional_strength = glm::max(glm::vec3(0.0f), m_directional_strength - glm::vec3(0.1f));
         }
@@ -50,7 +50,7 @@ namespace my_project {
         }
 
         // EVENT 1 (Dog model visibility)
-        if (platform->key(engine::platform::KEY_F3).state() == engine::platform::Key::State::JustReleased) {
+        if (platform->key(engine::platform::KEY_F3).state() == engine::platform::Key::State::JustPressed) {
             set_timer(5.0f);
             MyController::m_event1_in_waiting = true;
         }
@@ -60,7 +60,9 @@ namespace my_project {
         }
     }
 
-    void MyController::set_timer(float delay_seconds) { MyController::inner_event_timer = Timer(delay_seconds); }
+    void MyController::set_timer(float delay_seconds) {
+        MyController::inner_event_timer = engine::util::Timer(delay_seconds);
+    }
 
     void MyController::scene_event1() { MyController::m_draw_dog = !MyController::m_draw_dog; }
 
