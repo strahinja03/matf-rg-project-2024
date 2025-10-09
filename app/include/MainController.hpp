@@ -28,9 +28,6 @@ namespace my_project {
 
         void end_draw() override;
 
-        // Simple abstraction functions
-        //void draw_test_model();
-
         void draw_light_cube();
 
         void draw_island_model();
@@ -45,7 +42,6 @@ namespace my_project {
 
         void draw_instance();
 
-        // Setting up the initial camera parameters
         void initialize_camera();
 
         void set_timer(float delay_seconds);

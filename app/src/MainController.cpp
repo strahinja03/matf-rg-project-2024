@@ -11,6 +11,7 @@
 #include <spdlog/spdlog.h>
 #include <engine/core/Engine.hpp>
 #include <engine/graphics/Camera.hpp>
+#include <random>
 
 namespace my_project {
     MyController::Timer MyController::inner_event_timer(0.0f);
@@ -19,13 +20,6 @@ namespace my_project {
         engine::graphics::OpenGL::enable_depth_testing();
         spdlog::info("Hello, from the MyController initialize");
 
-        // Some debugging prints
-        // auto resource_c = engine::core::Controller::get<engine::resources::ResourcesController>();
-        // resource_c->print_loaded_textures();
-        // auto specular_t = resource_c->texture("resources/models/backpack/specular.jpg", "resources/models/backpack/specular.jpg", engine::resources::TextureType::Specular, false);
-        // for (auto &key: resource_c->get_m_textures() | std::views::keys) { spdlog::info(key.c_str()); }
-
-        // Setup the initial camera parametars
         initialize_camera();
         setup_random_rock_models_matrices();
     }
@@ -36,29 +30,27 @@ namespace my_project {
         if (platform->key(engine::platform::KEY_ESCAPE).state() == engine::platform::Key::State::JustReleased) {
             return false;
         }
-        // if (platform->key(engine::platform::KEY_ESCAPE).state_str() == "JustReleased") { return false; }
         return true;
     }
 
     void MyController::poll_events() {
         // An event to disable/enable cursor in the application, by default its enabled
         auto platform = engine::core::Controller::get<engine::platform::PlatformController>();
-        if (platform->key(engine::platform::KEY_F1).state_str() == "JustReleased") {
+        if (platform->key(engine::platform::KEY_F1).state() == engine::platform::Key::State::JustPressed) {
             m_enable_cursor = !m_enable_cursor;
             platform->set_enable_cursor(m_enable_cursor);
         }
 
         // Control directional lighting diffuse strength +, -
-        if (platform->key(engine::platform::KEY_1).state_str() == "JustPressed") {
+        if (platform->key(engine::platform::KEY_1).state() == engine::platform::Key::State::JustPressed) {
             m_directional_strength = glm::max(glm::vec3(0.0f), m_directional_strength - glm::vec3(0.1f));
         }
-        if (platform->key(engine::platform::KEY_2).state_str() == "JustPressed") {
+        if (platform->key(engine::platform::KEY_2).state() == engine::platform::Key::State::JustPressed) {
             m_directional_strength = glm::max(glm::vec3(0.0f), m_directional_strength + glm::vec3(0.1f));
         }
 
-        // // EVENT 1
+        // EVENT 1 (Dog model visibility)
         if (platform->key(engine::platform::KEY_F3).state() == engine::platform::Key::State::JustReleased) {
-            // ... wait 5 seconds then execute event1
             set_timer(5.0f);
             MyController::m_event1_in_waiting = true;
         }
@@ -95,9 +87,13 @@ namespace my_project {
             camera->move_camera(engine::graphics::Camera::Movement::RIGHT, dt);
         }
         if (platform->key(engine::platform::KEY_SPACE)
-            .state_str() == "Pressed") { camera->move_camera(engine::graphics::Camera::UP, dt); }
+            .state() == engine::platform::Key::State::Pressed) {
+            camera->move_camera(engine::graphics::Camera::UP, dt);
+        }
         if (platform->key(engine::platform::KEY_LEFT_CONTROL)
-            .state_str() == "Pressed") { camera->move_camera(engine::graphics::Camera::DOWN, dt); }
+            .state() == engine::platform::Key::State::Pressed) {
+            camera->move_camera(engine::graphics::Camera::DOWN, dt);
+        }
 
         auto mouse = platform->mouse();
         camera->rotate_camera(mouse.dx, mouse.dy);
@@ -107,7 +103,6 @@ namespace my_project {
     }
 
     void MyController::begin_draw() {
-        // Let`s clear the color buffers so that new colors can be drawn to the pixels
         engine::graphics::OpenGL::clear_buffers();
     }
 
@@ -119,7 +114,6 @@ namespace my_project {
         this->draw_light_source_birds();
         this->draw_skybox();
         if (MyController::m_draw_dog) { this->draw_model_dog(); }
-        //this->draw_light_cube();
         this->draw_instance();
     }
 
@@ -212,7 +206,6 @@ namespace my_project {
         shader->set_vec3("LightPoints[0].position", glm::vec3(1.0f, 3.5f, 3.3f));
         shader->set_vec3("LightPoints[0].ambient", glm::vec3(0.05f, 0.05f, 0.05f));
         shader->set_vec3("LightPoints[0].diffuse", glm::vec3(1.0f, 1.0f, 1.0f));
-        //shader->set_vec3("LightPoints[0].specular", glm::vec3(1.0f, 1.0f, 1.0f));
         shader->set_float("LightPoints[0].constant", 1.0f);
         shader->set_float("LightPoints[0].linear", 0.09f);
         shader->set_float("LightPoints[0].quadratic", 0.032f);
@@ -220,7 +213,6 @@ namespace my_project {
         shader->set_vec3("LightPoints[1].position", glm::vec3(-2.55f, -0.85f, 7.33f));
         shader->set_vec3("LightPoints[1].ambient", glm::vec3(0.05f, 0.05f, 0.05f));
         shader->set_vec3("LightPoints[1].diffuse", glm::vec3(0.8f, 0.8f, 0.8f));
-        //shader->set_vec3("LightPoints[1].specular", glm::vec3(1.0f, 1.0f, 1.0f));
         shader->set_float("LightPoints[1].constant", 1.0f);
         shader->set_float("LightPoints[1].linear", 0.14f);
         shader->set_float("LightPoints[1].quadratic", 0.07f);
@@ -242,36 +234,40 @@ namespace my_project {
     // Funkcija treba da mi konstruise "nasumicne" modele modele transformacija, treba mi onoliko matrica koliko cu imati instanci
     void MyController::setup_random_rock_models_matrices() {
         auto resources = engine::core::Controller::get<engine::resources::ResourcesController>();
-        // Ucitavam model koji ce biti renderovan vise puta(instanciran)
         engine::resources::Model *rock_model = resources->model("rock");
 
-        srand(5);
-        float radius = 50;
+        std::mt19937 gen(std::random_device{}());
+        std::uniform_real_distribution<float> displacement_dist(-1.0f, 1.0f);
+        std::uniform_real_distribution<float> scale_dist(0.05f, 0.25f);
+        std::uniform_real_distribution<float> rotation_dist(0.0f, glm::radians(360.0f));
+        std::uniform_real_distribution<float> y_offset_dist(-8.0f, 8.0f);
+
+        float radius = 50.0f;
         float offset = 2.5f;
 
         m_model_matrices.reserve(m_instance_count);
-        for (unsigned int i = 0; i < m_instance_count; i++) {
-            glm::mat4 model = glm::mat4(1.0f);
-            float angle = (float) i / (float) m_instance_count * 360.0f;
-            float displacement = (rand() % (int) (2 * offset * 100)) / 100.0f - offset;
-            float x = sin(angle) * radius + displacement;
-            displacement = (rand() % (int) (2 * offset * 100)) / 100.0f - offset;
-            float y = displacement * 0.4f;
-            displacement = (rand() % (int) (2 * offset * 100)) / 100.0f - offset;
-            float z = cos(angle) * radius + displacement;
+
+        for (unsigned int i = 0; i < m_instance_count; ++i) {
+            glm::mat4 model(1.0f);
+
+            float angle = static_cast<float>(i) / m_instance_count * glm::two_pi<float>();
+
+            float displacementX = displacement_dist(gen) * offset;
+            float displacementY = y_offset_dist(gen);
+            float displacementZ = displacement_dist(gen) * offset;
+            float x = std::sin(angle) * radius + displacementX;
+            float y = displacementY;
+            float z = std::cos(angle) * radius + displacementZ;
             model = glm::translate(model, glm::vec3(x, y, z));
-
-            float scale = (rand() % 20) / 100.0f + 0.05;
+            float scale = scale_dist(gen);
             model = glm::scale(model, glm::vec3(scale));
-
-            float rotAngle = (rand() % 360);
-            model = glm::rotate(model, rotAngle, glm::vec3(0.4f, 0.6f, 0.8f));
-
+            float rotAngle = rotation_dist(gen);
+            model = glm::rotate(model, rotAngle, glm::normalize(glm::vec3(0.4f, 0.6f, 0.8f)));
             m_model_matrices.push_back(model);
         }
-
         rock_model->set_instance_transforms(m_model_matrices);
     }
+
 
     void MyController::draw_instance() {
         auto resources = engine::core::Controller::get<engine::resources::ResourcesController>();
@@ -293,7 +289,6 @@ namespace my_project {
         auto camera = graphics_C->camera();
         camera->Position = glm::vec3(9.4f, -2.6f, 24.1f);
 
-        // Adjusting some settings to make it easier to use
         camera->MovementSpeed += 3;
         camera->MouseSensitivity += 0.1;
     }
@@ -313,12 +308,5 @@ namespace my_project {
         model = glm::scale(model, glm::vec3(0.04f));
         shader->set_mat4("model", model);
         light_birds->draw(shader);
-
-        // auto model1 = glm::mat4(1.0f);
-        // model1 = glm::rotate(model1, glm::radians(30.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-        // model1 = glm::translate(model1, glm::vec3(-5.8f, -0.8f, 5.15f));
-        // model1 = glm::scale(model1, glm::vec3(0.04f));
-        // shader->set_mat4("model", model1);
-        // light_birds->draw(shader);
     }
 }
